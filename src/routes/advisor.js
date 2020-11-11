@@ -1,6 +1,6 @@
 const express = require('express');
 // require advisor database to use it
-const advisor = require('../database/models/advisor/advisorCollection')
+const advisor = require('../models/advisor/advisorCollection')
 
 const router = new express.Router();
 
@@ -10,7 +10,7 @@ router.get('/advisors', (req,res)=>{
     })
 })
 
-router.post('/advisorSignup', async(req, res)=>{
+router.post('/advisors/signup', async(req, res)=>{
     try {
         let adv = await new advisor({
             fname: req.body.fname,
