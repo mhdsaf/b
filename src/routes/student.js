@@ -1,7 +1,7 @@
 const express = require('express');
 const Student = require('../models/student/studentCollection')
 const studentAuth =  require('../middleware/studentAuth');
-
+const scrape = require('../generalPurposeFunctions/scrape/scrape')
 const router = new express.Router();
 
 router.post('/students/signup', async (req,res)=>{
@@ -37,5 +37,12 @@ router.post('/students/add-advisor',studentAuth,async(req,res)=>{
     // }
     res.status(200).send("add advisor")
 })
-
+router.get('/mostdemandedjobs', async (req,res)=>{
+    try {
+        const data = await scrape('https://www.indeed.com/career-advice/finding-a-job/in-demand-careers')
+        res.status(200).send(data)
+    } catch (error) {
+        console.log(error)
+    }
+})
 module.exports = router 
