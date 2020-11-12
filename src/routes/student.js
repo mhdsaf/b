@@ -1,5 +1,6 @@
 const express = require('express');
 const Student = require('../models/student/studentCollection')
+const studentAuth =  require('../middleware/studentAuth');
 
 const router = new express.Router();
 
@@ -29,4 +30,12 @@ router.post('/students/login',async(req,res)=>{
         res.status(400).send({error: e.message})
     }
 })
+router.post('/students/add-advisor',studentAuth,async(req,res)=>{
+    // try{
+    //     const student = 
+    //     const addAdvisor = student.addAdvisor(req.body._id)
+    // }
+    res.status(200).send("add advisor")
+})
+
 module.exports = router 
