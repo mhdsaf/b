@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const Schema = mongoose.Schema
 const studentSchema = new mongoose.Schema({
     fname:{
         type: String,
@@ -27,16 +28,23 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    advisors:[{
+        type: Schema.ObjectId
+    }],
     tokens: [{
         token:{
-            type:String,
-            required: true
+            type:String
         }
     }]
 }, {timestamps: true});
 
+studentSchema.methods.addAdvisor = async (_id)=>{
+    this.advisors = this.advisors.concat(_id)
+    await this.save()
+}
+
 studentSchema.methods.generateAuthToken = async function() {
-    const token = jwt.sign({_id: this._id.toString()},'FypFriday')
+    const token = jwt.sign({email: this.email},'fypfridaystudent')
     
     this.tokens = this.tokens.concat({token: token})
     await this.save()
