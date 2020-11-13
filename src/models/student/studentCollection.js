@@ -44,8 +44,7 @@ studentSchema.methods.addAdvisor = async (_id)=>{
 }
 
 studentSchema.methods.generateAuthToken = async function() {
-    const token = jwt.sign({email: this.email},'fypfridaystudent')
-    
+    const token = jwt.sign({email: this.email},'fypfridaystudent', {expiresIn: '3600000'})
     this.tokens = this.tokens.concat({token: token})
     await this.save()
 
