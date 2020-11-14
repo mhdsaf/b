@@ -8,7 +8,7 @@ const studentAuth = async (req,res,next)=>{
         if(!student){
             throw new Error(e)
         }
-        req.studentId = student._id
+        req.studentemail = student.email
         next()
     }catch(e){
         res.status(401).send({error: "unauthorized"}) 

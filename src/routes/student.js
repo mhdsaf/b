@@ -31,11 +31,15 @@ router.post('/students/login',async(req,res)=>{
     }
 })
 router.post('/students/add-advisor',studentAuth,async(req,res)=>{
-    // try{
-    //     const student = 
-    //     const addAdvisor = student.addAdvisor(req.body._id)
-    // }
-    res.status(200).send("add advisor")
+    console.log(req.studentemail);
+     try{
+        const student = await Student.findOne({email:req.studentemail})
+        const addAdvisor = await student.addAdvisor(req.body.email)
+        res.status(200).send("advisor added")
+        }
+        catch(e){
+            res.status(400).send({error: e.message})
+        }
 })
 router.get('/mostdemandedjobs', async (req,res)=>{
     try {

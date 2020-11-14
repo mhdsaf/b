@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt')
+const Advisor = require('../advisor/advisorCollection')
 const jwt = require('jsonwebtoken')
 const Schema = mongoose.Schema
 const studentSchema = new mongoose.Schema({
@@ -18,7 +19,7 @@ const studentSchema = new mongoose.Schema({
     },
     interests:{
         type: [String],
-        enum: ['Math','Physics','Bio','Chemistry','Philosophy','Sport','Art','Political Science'] 
+        enum: ['Math','Physics','Bio','Chemistry','Philosophy','Sport','Art','Political Science']
     },
     country:{
         type: String,
@@ -29,17 +30,42 @@ const studentSchema = new mongoose.Schema({
         required: true
     },
     advisors:[{
-        type: Schema.ObjectId
+        advisor:{
+       ref: 'Advisor',
+        type: Schema.Types.ObjectId 
+        }
     }],
     tokens: [{
         token:{
             type:String
         }
-    }]
+    }],
+    // notesToSelf:[{
+    //    id:
+    //     {
+    //         type: ObjectId,
+            
+    //     }, 
+    //     title:
+    //     {
+    //         type:String
+    //     },
+    //     body:
+    //     {
+    //         type:String
+    //     },
+    //     dateCreated:
+    //     {
+    //         type: Date
+    //     }
+
+    // }],
+    
 }, {timestamps: true});
 
-studentSchema.methods.addAdvisor = async (_id)=>{
-    this.advisors = this.advisors.concat(_id)
+studentSchema.methods.addAdvisor = async function(email){
+    const advisor = await Advisor.findOne({email:email})
+    this.advisors = this.advisors.concat({advisor:advisor})
     await this.save()
 }
 
@@ -51,7 +77,7 @@ studentSchema.methods.generateAuthToken = async function() {
     return token
 }
 studentSchema.statics.findByCredentials = async (_email,_password)=>{
-    const student = await Model.findOne({email: _email})
+    const student = await Student.findOne({email: _email})
     if(!student){
         throw Error('incorrect user or password')
     }
@@ -68,5 +94,6 @@ studentSchema.pre('save', async function(next) {
     next()
 });
 
-const Model = mongoose.model('Students', studentSchema);
-module.exports = Model;
+const Student = mongoose.model('Student', studentSchema);
+module.exports = Student;
+

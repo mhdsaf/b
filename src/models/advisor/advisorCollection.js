@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Schema = mongoose.Schema
 const advisorSchema = new mongoose.Schema({
+ 
     fname:{
         type: String,
         required: true
@@ -20,7 +21,8 @@ const advisorSchema = new mongoose.Schema({
         required: true
     },
     students:[{
-        type: Schema.ObjectId
+        ref: 'Student',
+        type: Schema.Types.ObjectId
     }],
     tokens: [{
         token:{
@@ -38,7 +40,7 @@ advisorSchema.methods.generateAuthToken = async function() {
     return token
 }
 advisorSchema.statics.findByCredentials = async (_email,_password)=>{
-    const advisor = await Model.findOne({email: _email})
+    const advisor = await Advisor.findOne({email: _email})
     if(!advisor){
         throw Error('incorrect user or password')
     }
@@ -55,5 +57,5 @@ advisorSchema.pre('save', async function(next) {
     next()
 });
 
-const Model = mongoose.model('Advisors', advisorSchema);
-module.exports = Model;
+const Advisor = mongoose.model('Advisor', advisorSchema);
+module.exports = Advisor;
