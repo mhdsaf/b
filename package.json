@@ -18,7 +18,9 @@
     "express": "^4.17.1",
     "isomorphic-fetch": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.10.13"
+    "mongoose": "^5.10.13",
+    "nodemailer": "^6.4.16",
+    "randomstring": "^1.1.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"

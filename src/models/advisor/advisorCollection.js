@@ -20,6 +20,10 @@ const advisorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    status:{
+        type:String,
+        default:"pending"
+    },
     students:[{
         ref: 'Student',
         type: Schema.Types.ObjectId
@@ -32,7 +36,7 @@ const advisorSchema = new mongoose.Schema({
 }, {timestamps: true});
 
 advisorSchema.methods.generateAuthToken = async function() {
-    const token = jwt.sign({email: this.email},'fypfridaystudent')
+    const token = jwt.sign({email: this.email},'fypfridaystudent' ,{expiresIn: '3600000'})
     
     this.tokens = this.tokens.concat({token: token})
     await this.save()

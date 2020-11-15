@@ -11,6 +11,9 @@ const advisorAuth = async (req,res,next)=>{
         req.advisorId = advisor._id
         next()
     }catch(e){
+        if(e.message === "jwt expired"){
+            res.status(401).send({error:"please login in again"})
+        }
         res.status(401).send({error: "unauthorized"}) 
     }
 }

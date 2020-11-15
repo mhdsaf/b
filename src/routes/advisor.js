@@ -1,15 +1,12 @@
 const express = require('express');
 // require advisor database to use it
 const Advisor = require('../models/advisor/advisorCollection')
-const advisorAuth =  require('../middleware/advisorAuth');
+const SecretCode = require('../models/SecretCode/SecretCode')
+const advisorAuth =  require('../middleware/advisorAuth')
+const randomstring = require('randomstring')
+const nodemailer = require('.././generalPurposeFunctions/sendEmail')
 
 const router = new express.Router();
-
-router.get('/advisors', (req,res)=>{
-    res.send({
-        students: 'Malka'
-    })
-})
 
 router.post('/advisors/signup', async(req, res)=>{
     try {
@@ -20,10 +17,18 @@ router.post('/advisors/signup', async(req, res)=>{
             password: req.body.password
         });
         await advisor.save();
-        res.status(201).send({message: "Successfully signed up"})
+        const secretCode = new SecretCode({
+            email: req.body.email,
+            code: randomstring.generate(32)
+        })
+        
+        res.status(200).send({message: "sign up completed"})
     } catch (error) {
         res.status(400).send({message: 'Missing field(s)'})
     }
+})
+router.post('/validate-account/:advisor_id/:secretcode',async(req,res)=>{
+
 })
 router.post('/advisors/login',async(req,res)=>{
     try{
