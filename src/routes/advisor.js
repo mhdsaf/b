@@ -54,6 +54,7 @@ router.post('/validate-account',async(req,res)=>{
 
 router.post('/advisors/login',async(req,res)=>{
     try{
+        console.log("")
         const advisor = await Advisor.findByCredentials(req.body.email,req.body.password)
         if(!advisor.status==="active"){
             throw new Error("please verify your account")
