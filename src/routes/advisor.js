@@ -4,8 +4,13 @@ const Advisor = require('../models/advisor/advisorCollection')
 const SecretCode = require('../models/SecretCode/SecretCode')
 const advisorAuth =  require('../middleware/advisorAuth')
 const randomstring = require('randomstring')
+<<<<<<< HEAD
 const nodemailer = require('.././generalPurposeFunctions/sendEmail')
 const Note = require('../models/notes/noteCollection')
+=======
+const welcomeEmail = require('.././generalPurposeFunctions/sendEmail');
+
+>>>>>>> 5fd4a94... impelemnt validation
 const router = new express.Router();
 
 router.post('/advisors/signup', async(req, res)=>{
@@ -16,26 +21,49 @@ router.post('/advisors/signup', async(req, res)=>{
             email: req.body.email,
             password: req.body.password
         });
-        await advisor.save();
+        const returnedAdvisor = await advisor.save();
         const secretCode = new SecretCode({
             email: req.body.email,
             code: randomstring.generate(32)
         })
-        
-        res.status(200).send({message: "sign up completed"})
+        await secretCode.save()
+        await welcomeEmail(req.body.email,req.body.fname+' '+req.body.lname,`http://localhost:3000/validate-account/${returnedAdvisor._id}/${secretCode._id}`)
+        res.status(200).send({message:"recieved"})
     } catch (error) {
+        console.log(error)
         res.status(400).send({message: 'Missing field(s)'})
     }
 })
-router.post('/validate-account/:advisor_id/:secretcode',async(req,res)=>{
 
+router.post('/validate-account',async(req,res)=>{
+    try{
+        const advisor = await Advisor.findById(req.body.advisor_id)
+        const secretCode = await SecretCode.findById(req.body.secret_code)
+        if(!secretCode){
+            throw new Error()
+        }
+        if(advisor.email===secretCode.email){
+            advisor.status = "active"
+            await advisor.save()
+            res.status(200).send({message:"recieved"})
+        }
+    }catch(e){
+        res.status(400).send({erro:"error"})
+    }
 })
+
 router.post('/advisors/login',async(req,res)=>{
     try{
         const advisor = await Advisor.findByCredentials(req.body.email,req.body.password)
+        if(!advisor.status==="active"){
+            throw new Error("please verify your account")
+        }
         const token = await advisor.generateAuthToken()
         res.status(200).send({token: token})
     }catch(e){
+        if(e.message==="please verify your account"){
+            res.status(400).send({error:e.message})
+        }
         res.status(400).send({error: "unexpected error"})
     }
 })

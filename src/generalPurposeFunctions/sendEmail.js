@@ -1,27 +1,26 @@
 var nodemailer = require('nodemailer');
 
 var transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: 'hotmail',
   auth: {
-    user: 'safov.safov@gmail.com',
-    pass: 'ghassan123'
+    user: 'alhussein_99@hotmail.com',
+    pass: './q1m2n3/.'
   }
 });
 
-const welcomeEmail = (email, username, URL) => {
-    var mailOptions = {
-        from: 'safieddinemhd@gmail.com',
+const welcomeEmail = async(email, username, URL) => {
+    try{
+      var mailOptions = {
+        from: 'alhussein_99@hotmail.com',
         to: email,
         subject: 'Welcome to Task Manager',
-        text: `Hello ${username.toUpperCase()}. Welcome to Task Manager Application. We hope that you have an excellent experience using our platform! Please take a few minutes to verify your account: jot--down.herokuapp.com/users/verify/${URL} `
-    };
-      
-    transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
-          console.log(error);
-        } else {
-          console.log('Email sent: ' + info.response);
-        }
-    });   
+        html: `<h1>thank you ${username} for signing in !<h1><p>please validate your account by clicking the following url :\n ${URL}</p> `
+      };
+      const message = await transporter.sendMail(mailOptions) 
+      return message
+    }catch(e){
+      return "error"
+    }
 };
-welcomeEmail('safieddinemhd@gmail.com', 'mhdsaf', 'aksdjhas')
+module.exports = welcomeEmail
+// welcomeEmail('hsenwehbe1@gmail.com','hussein wehbe','hjghjhhj')

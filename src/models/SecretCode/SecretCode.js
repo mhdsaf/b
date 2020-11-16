@@ -10,6 +10,7 @@ const SecretCodeSchema = new Schema({
     code:{ 
         type:String,
         required:true,
+        unique:true
     },
     dateCreated:{
         type:Date,
@@ -17,3 +18,6 @@ const SecretCodeSchema = new Schema({
         expires:900
     }
 })
+
+const Model = mongoose.model('secret-code',SecretCodeSchema)
+module.exports = Model
