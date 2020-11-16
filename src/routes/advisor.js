@@ -4,13 +4,8 @@ const Advisor = require('../models/advisor/advisorCollection')
 const SecretCode = require('../models/SecretCode/SecretCode')
 const advisorAuth =  require('../middleware/advisorAuth')
 const randomstring = require('randomstring')
-<<<<<<< HEAD
-const nodemailer = require('.././generalPurposeFunctions/sendEmail')
+const welcomeEmail = require('.././generalPurposeFunctions/sendEmail')
 const Note = require('../models/notes/noteCollection')
-=======
-const welcomeEmail = require('.././generalPurposeFunctions/sendEmail');
-
->>>>>>> 5fd4a94... impelemnt validation
 const router = new express.Router();
 
 router.post('/advisors/signup', async(req, res)=>{
@@ -54,7 +49,6 @@ router.post('/validate-account',async(req,res)=>{
 
 router.post('/advisors/login',async(req,res)=>{
     try{
-        console.log("")
         const advisor = await Advisor.findByCredentials(req.body.email,req.body.password)
         if(!advisor.status==="active"){
             throw new Error("please verify your account")

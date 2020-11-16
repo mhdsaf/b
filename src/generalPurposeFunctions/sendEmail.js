@@ -1,17 +1,17 @@
 var nodemailer = require('nodemailer');
 
 var transporter = nodemailer.createTransport({
-  service: 'hotmail',
+  service: 'gmail',
   auth: {
-    user: 'alhussein_99@hotmail.com',
-    pass: './q1m2n3/.'
+    user: 'safieddinemhd@gmail.com',
+    pass: 'ghassan62131121'
   }
 });
 
 const welcomeEmail = async(email, username, URL) => {
     try{
       var mailOptions = {
-        from: 'alhussein_99@hotmail.com',
+        from: 'safieddinemhd@gmail.com',
         to: email,
         subject: 'Welcome to Task Manager',
         html: `<h1>thank you ${username} for signing in !<h1><p>please validate your account by clicking the following url :\n ${URL}</p> `
@@ -23,4 +23,3 @@ const welcomeEmail = async(email, username, URL) => {
     }
 };
 module.exports = welcomeEmail
-// welcomeEmail('hsenwehbe1@gmail.com','hussein wehbe','hjghjhhj')
