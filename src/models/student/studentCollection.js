@@ -40,26 +40,7 @@ const studentSchema = new mongoose.Schema({
             type:String
         }
     }],
-    // notesToSelf:[{
-    //    id:
-    //     {
-    //         type: ObjectId,
-            
-    //     }, 
-    //     title:
-    //     {
-    //         type:String
-    //     },
-    //     body:
-    //     {
-    //         type:String
-    //     },
-    //     dateCreated:
-    //     {
-    //         type: Date
-    //     }
 
-    // }],
     
 }, {timestamps: true});
 

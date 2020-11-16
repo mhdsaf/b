@@ -5,7 +5,7 @@ const SecretCode = require('../models/SecretCode/SecretCode')
 const advisorAuth =  require('../middleware/advisorAuth')
 const randomstring = require('randomstring')
 const nodemailer = require('.././generalPurposeFunctions/sendEmail')
-
+const Note = require('../models/notes/noteCollection')
 const router = new express.Router();
 
 router.post('/advisors/signup', async(req, res)=>{
@@ -48,6 +48,45 @@ router.post('/advisors/add-student',advisorAuth,async(req,res)=>{
         res.status(400).send({error: "unexpected error"})
     }
     
+})
+
+//getNotes
+router.get('/advisors/notes',advisorAuth,async(req,res)=>
+{
+    try{
+        const notes =await Note.find({advisors: req.advisorId}).populate('advisors','email').populate('students','email')
+        res.send({notes})
+    }catch(e)
+    {
+        res.status(400).send({error:e})
+    }
+})
+//addNotes
+router.post('/advisors/notes',advisorAuth,async(req,res)=>
+{
+    try{
+        const student = await Student.findById(req.body.student)
+        if(!student)
+        {
+            res.status(401).send({error: "Incorrect inputs"}) 
+        }
+        else{
+        console.log(req.advisorId)
+        const newNote = await new Note({
+            advisors: req.advisorId,
+            students: req.body.student,
+            title: req.body.title,
+            body: req.body.body,
+            type: 'advice'    
+        })
+         }   
+        console.log(req.body.student)
+        await newNote.save()
+        res.status(201).send({message: "Note saved!"})
+    }catch(e)
+    {
+        res.status(400).send({error: e})
+    }
 })
 
 module.exports = router
