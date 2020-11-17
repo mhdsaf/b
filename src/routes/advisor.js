@@ -65,8 +65,9 @@ router.post('/advisors/login',async(req,res)=>{
 router.post('/advisors/add-student',advisorAuth,async(req,res)=>{
     try{
         //keep tracking advisor
+        console.log(req.advisorId)
         const advisor = await Advisor.findById(req.advisorId)
-        res.status(200).send({advisor})
+        res.status(200).send({advisor_name:advisor.fname+' '+advisor.lname})
     }catch(e){
         res.status(400).send({error: "unexpected error"})
     }
