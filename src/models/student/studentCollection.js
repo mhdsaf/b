@@ -17,6 +17,10 @@ const studentSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
+    status:{
+        type:String,
+        default:"pending"
+    },
     interests:{
         type: [String],
         enum: ['Math','Physics','Bio','Chemistry','Philosophy','Sport','Art','Political Science']
@@ -35,13 +39,7 @@ const studentSchema = new mongoose.Schema({
         type: Schema.Types.ObjectId 
         }
     }],
-    tokens: [{
-        token:{
-            type:String
-        }
-    }],
-
-    
+    tokens: [],
 }, {timestamps: true});
 
 studentSchema.methods.addAdvisor = async function(email){

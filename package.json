@@ -14,12 +14,17 @@
   "dependencies": {
     "bcrypt": "^5.0.0",
     "cheerio": "^1.0.0-rc.3",
+    "convert-array-to-csv": "^2.0.0",
     "cors": "^2.8.5",
+    "csv-parse": "^4.14.2",
+    "csv-parser": "^3.0.0",
     "express": "^4.17.1",
     "isomorphic-fetch": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
     "jsonwebtoken-refresh": "^5.7.0",
     "mongoose": "^5.10.13",
+    "neat-csv": "^6.0.0",
+    "node-csv": "^0.1.2",
     "nodemailer": "^6.4.16",
     "randomstring": "^1.1.5"
   },

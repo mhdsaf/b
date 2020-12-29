@@ -4,7 +4,7 @@ const studentAuth = async (req,res,next)=>{
     try{
         const token = req.header('Authorization').replace('Bearer ','')
         const decoded = jwt.verify(token,'fypfridaystudent')
-        const student = await Student.findOne({email: decoded.email, 'tokens.token': token})
+        const student = await Student.findOne({email: decoded.email})
         if(!student){
             throw new Error(e)
         }
