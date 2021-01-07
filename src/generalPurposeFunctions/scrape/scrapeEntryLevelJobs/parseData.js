@@ -1,18 +1,3 @@
-/*
-    https://www.indeed.com/jobs?q=software+developer&jt=fulltime&explvl=entry_level
-    
-    https://www.linkedin.com/jobs/search/?f_E=2&f_JT=F&geoId=92000000&keywords=Data%20Entry%20Clerk&location=Worldwide
-
-    https://www.linkedin.com/jobs/search/?f_E=2&f_JT=F&geoId=92000000&keywords=ER%20Nurse&location=Worldwide
-    
-    
-
-    body > div.application-outlet > div.authentication-outlet > div.job-search-ext > div > div > section.jobs-search__left-rail > div > header > div.jobs-search-results-list__title-heading > small
-    
-    body > div.application-outlet > div.authentication-outlet > div.job-search-ext > div > div > section.jobs-search__left-rail > div > header > div.jobs-search-results-list__title-heading > small
-    
-*/
-
     const scrapeData = async (data)=>{
         const fs = require('fs');
         const writeStream = fs.createWriteStream('data.csv');

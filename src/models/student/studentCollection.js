@@ -21,6 +21,10 @@ const studentSchema = new mongoose.Schema({
         type:String,
         default:"pending"
     },
+    didTakeTest:{
+        type:Boolean,
+        default:false
+    },
     interests:{
         type: [String],
         enum: ['Math','Physics','Bio','Chemistry','Philosophy','Sport','Art','Political Science']
@@ -38,8 +42,7 @@ const studentSchema = new mongoose.Schema({
        ref: 'Advisor',
         type: Schema.Types.ObjectId 
         }
-    }],
-    tokens: [],
+    }]
 }, {timestamps: true});
 
 studentSchema.methods.addAdvisor = async function(email){
@@ -58,20 +61,21 @@ studentSchema.methods.generateAuthToken = async function() {
 studentSchema.statics.findByCredentials = async (_email,_password)=>{
     const student = await Student.findOne({email: _email})
     if(!student){
-        throw Error('incorrect user or password')
+        throw new Error('incorrect user or password')
     }
 
-    const isMatch = bcrypt.compare(_password,student.password)
+    const isMatch = await bcrypt.compare(_password, student.password.trim())
+    console.log(isMatch)
     if(!isMatch){
-        throw Error('incorrect user or password')
+        throw new Error('incorrect user or password')
     }
 
     return student 
 }
-studentSchema.pre('save', async function(next) {
-    this.password = await bcrypt.hash(this.password, 8)
-    next()
-});
+// studentSchema.pre('save', async function(next) {
+//     this.password = await bcrypt.hash(this.password, 8)
+//     next()
+// });
 
 const Student = mongoose.model('Student', studentSchema);
 module.exports = Student;

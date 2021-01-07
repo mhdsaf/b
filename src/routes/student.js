@@ -7,42 +7,32 @@ const scrapeAllRoles = require('../generalPurposeFunctions/scrape/scrapeAllRoles
 const router = new express.Router();
 const Note = require('../models/notes/noteCollection')
 const Scraping = require('../models/scraping/scrapingCollection')
-const welcomeEmail = require('.././generalPurposeFunctions/sendEmail')
+const welcomeEmail = require('../generalPurposeFunctions/Emails/welcomeEmail')
 const zeus = require('../generalPurposeFunctions/scrape/scrapeRolesDetails/try')
-
-router.get('/students/info', studentAuth, async (req, res)=>{
-    try {
-        let Prom1 = await Student.findOne({email: req.studentemail})
-        res.send({
-            fname: Prom1.fname,
-            lname: Prom1.lname
-        })
-    } catch (error) {
-        console.log(error)
-        res.send(error)
-    }
-})
+const bcrypt = require('bcrypt')
+const resetPasswordEmail = require('../generalPurposeFunctions/Emails/resetPasswordEmail')
+const writeCsv = require('../generalPurposeFunctions/scrape/csvWriteTemplate')
 router.post('/students/signup', async (req,res)=>{    
     try{
         let oldStudent = await Student.findOne({email: req.body.email})
         if(oldStudent!=undefined){
             throw new Error('Email already taken')
         }
+        const hashedPass = await bcrypt.hash(req.body.password, 8)
         const newStudent = await new Student({
             fname: req.body.fname,
             lname: req.body.lname,
             email: req.body.email,
             interests: req.body.interests,
             country: req.body.country,
-            password: req.body.password
+            password: hashedPass
         })
         await newStudent.save()
         const token = await jwt.sign({email: req.body.email},'fypfridaystudent', {expiresIn: '3600000000'})
         await welcomeEmail(req.body.email, req.body.fname, req.body.lname, token)
         res.status(201).send({message: "succesfully signed in!"})
     }catch(e){
-        console.log(e)
-        res.status(400).send({error: e})
+        res.status(400).send({error: e.message})
     }
 })
 
@@ -54,9 +44,6 @@ router.post('/students/verify', async (req,res)=>{
         const student = await Student.findOne({email: decodedToken.email})
         student.status = 'active'
         const newToken = await jwt.sign({email: student.email},'fypfridaystudent', {expiresIn: '3600000'})
-        let newTokensArray = [...student.tokens]
-        newTokensArray.push(newToken)
-        student.tokens = newTokensArray
         await student.save()
         res.status(200).send({token: newToken})
     } catch (error) {
@@ -66,10 +53,73 @@ router.post('/students/verify', async (req,res)=>{
 
 router.post('/students/login',async(req,res)=>{
     try{
-        const student = await Student.findByCredentials(req.body.email,req.body.password)
-        const token = await student.generateAuthToken()
-        res.status(200).send({token: token})
+        const student = await Student.findOne({email:req.body.email})
+        if(student){
+            if(student.status=='active'){
+                const password = await student.password.trim()
+                console.log(password)
+                console.log(req.body.password)
+                const isMatch = await bcrypt.compare(req.body.password, password)
+                if(isMatch){
+                    const newToken = await jwt.sign({email: student.email},'fypfridaystudent', {expiresIn: '3600000'})
+                    res.status(200).send({token: newToken})
+                }else{
+                    throw new Error('invalid credentials')
+                }
+            }else{
+                throw new Error('unverified account')
+            }
+        }else{
+            throw new Error('invalid credentials')
+        }
+        
     }catch(e){
+        res.status(400).send({error: e.message})
+    }
+})
+
+router.post('/students/resetpass', async (req, res)=>{
+    try {
+        const token = await jwt.sign({email: req.body.email},'fypfridaystudent', {expiresIn: '3600000'})
+        await resetPasswordEmail(req.body.email, token)
+        res.status(200).send('Email sent')
+    } catch (e) {
+        console.log(e)
+        res.status(400).send({error: e.message})
+    }
+})
+
+router.patch('/students/resetpass', async (req, res)=>{
+    try {
+        const student = await Student.findOne({email: req.body.email})
+        const hashedPass = await bcrypt.hash(req.body.password, 8)
+        student.password = hashedPass
+        await student.save()
+        res.status(200).send('Password changed successfully')
+    } catch (e) {
+        console.log(e)
+        res.status(400).send({error: e.message})
+    }
+})
+
+router.get('/students/info', studentAuth, async (req, res)=>{
+    try {
+        let student = await Student.findOne({email: req.studentemail})
+        res.send({
+            fname: student.fname,
+            lname: student.lname,
+            didTakeTest: student.didTakeTest
+        })
+    } catch (error) {
+        console.log(error)
+        res.send(error)
+    }
+})
+
+router.get('/token-validity', studentAuth, async (req,res)=>{
+    try {
+        res.status(200).send({email: req.studentemail})
+    } catch (e) {
         res.status(400).send({error: e.message})
     }
 })
@@ -165,6 +215,7 @@ router.delete('/students/notes/:id',studentAuth,async(req,res)=>
     }
 })
 
+///// SCRAPING ONLY:
 router.get('/mostdemandedjobs', async (req,res)=>{
     try {
         const data = await scrapeMostDemandedJobs('https://www.indeed.com/career-advice/finding-a-job/in-demand-careers')
@@ -294,5 +345,25 @@ router.get('/excel', async (req,res)=>{
     })
 })
 
-
+router.get('/final', async (req,res)=>{
+    try {
+        let i = 0
+        let content = ''
+        let arr = []
+        const data = await Scraping.find();
+        await data[0].data.forEach(async element => {
+            content = await element.details.join('. ')
+            arr.push(content)
+            //console.log(content)
+            // element.details.forEach(elements => {
+            //     i++
+            // });
+        });
+        await writeCsv(arr)
+        console.log(arr)
+        res.status(200).send('ok')
+    } catch (error) {
+        console.log(error)
+    }
+})
 module.exports = router 

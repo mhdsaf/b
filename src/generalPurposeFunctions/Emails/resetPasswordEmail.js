@@ -8,13 +8,13 @@ var transporter = nodemailer.createTransport({
   }
 });
 
-const welcomeEmail = async(email, fname, lname, token) => {
+const resetPassword = async(email, token) => {
     try{
       var mailOptions = {
         from: 'alhussein_99@hotmail.com',
         to: email,
-        subject: 'Welcome to LinkedEd',
-        html: `<h1>Thank you ${fname} ${lname} for signing in!</h1><p>Please validate your account by clicking the following link:</p> <a>localhost:3000/students/verify/${token}</a>`
+        subject: 'Password Reset',
+        html: `<h1>Hello ${email}</h1><p>As per your request, please click on the below link to reset your password. Note that the link is valid for 1 hour only.</p> <a href=http://localhost:3000/resetpassword/${token}>Reset password</a>`
       };
       const message = await transporter.sendMail(mailOptions)
       console.log('mail sent')
@@ -23,4 +23,4 @@ const welcomeEmail = async(email, fname, lname, token) => {
       return "error"
     }
 };
-module.exports = welcomeEmail
+module.exports = resetPassword

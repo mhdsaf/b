@@ -4,7 +4,7 @@ const Advisor = require('../models/advisor/advisorCollection')
 const SecretCode = require('../models/SecretCode/SecretCode')
 const advisorAuth =  require('../middleware/advisorAuth')
 const randomstring = require('randomstring')
-const welcomeEmail = require('.././generalPurposeFunctions/sendEmail')
+const welcomeEmail = require('.././generalPurposeFunctions/Emails/welcomeEmail')
 const Note = require('../models/notes/noteCollection')
 const router = new express.Router();
 
