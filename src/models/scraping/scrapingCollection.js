@@ -18,7 +18,7 @@ const scrapingSchema = new mongoose.Schema({
             required: true,
         },
         details: [],
-        //requirements: []
+        requirements: []
     }]
 }, {timestamps: true});
 

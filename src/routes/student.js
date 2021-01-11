@@ -12,6 +12,7 @@ const zeus = require('../generalPurposeFunctions/scrape/scrapeRolesDetails/try')
 const bcrypt = require('bcrypt')
 const resetPasswordEmail = require('../generalPurposeFunctions/Emails/resetPasswordEmail')
 const writeCsv = require('../generalPurposeFunctions/scrape/csvWriteTemplate')
+const getSkills = require('../generalPurposeFunctions/scrape/scrapeRolesSkills/scrapeRolesSkills')
 router.post('/students/signup', async (req,res)=>{    
     try{
         let oldStudent = await Student.findOne({email: req.body.email})
@@ -362,6 +363,47 @@ router.get('/final', async (req,res)=>{
         await writeCsv(arr)
         console.log(arr)
         res.status(200).send('ok')
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+router.get('/find', async (req, res)=>{
+    try {
+        const data = await Scraping.findById('5fea3afcb7f0ab11e0728fcf')
+        const skills = await getSkills()
+        await skills.forEach((element, index) => {
+            let arr = []
+            arr.push(element)
+            data.data[index].requirements = arr
+        })
+        await data.save()
+        res.status(200).send('done')
+    } catch (error) {
+        console.log(error)
+    }
+})
+router.get('/toexcel', async (req, res)=>{
+    try {
+        const data = await Scraping.findById('5fea3afcb7f0ab11e0728fcf')
+        let arr = []
+        let x = ''
+        let count = 0
+        for (let i = 0; i <= 420; i++) {
+            if(data.data[i].requirements[0].qualifications.length>1){
+                x = data.data[i].requirements[0].qualifications.join('. ')
+            }else{
+                count++
+                x = ''
+            }
+            arr.push(x)
+        }
+        await writeCsv(arr)
+        res.send({msg: 'Done'})
+        //console.log(data.data[0].requirements)
+        //console.log(data.data[0].requirements[0].skills)
+        //data.data[0].requirements[0].skills
+        //data.data[0].requirements[1].qualifications
     } catch (error) {
         console.log(error)
     }

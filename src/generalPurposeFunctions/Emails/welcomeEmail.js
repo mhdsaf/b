@@ -1,5 +1,6 @@
 var nodemailer = require('nodemailer');
-
+var hbs = require('nodemailer-express-handlebars')
+const path = require('path')
 var transporter = nodemailer.createTransport({
   service: 'hotmail',
   auth: {
@@ -7,6 +8,16 @@ var transporter = nodemailer.createTransport({
     pass: './q1m2n3/.'
   }
 });
+const handlebarOptions = {
+    viewEngine: {
+      extName: ".handlebars",
+      partialsDir: path.resolve(__dirname, "views"),
+      defaultLayout: false,
+    },
+    viewPath: path.resolve(__dirname, "views"),
+    extName: ".handlebars",
+};
+transporter.use('compile', hbs(handlebarOptions))
 
 const welcomeEmail = async(email, fname, lname, token) => {
     try{
@@ -14,13 +25,19 @@ const welcomeEmail = async(email, fname, lname, token) => {
         from: 'alhussein_99@hotmail.com',
         to: email,
         subject: 'Welcome to LinkedEd',
-        html: `<h1>Thank you ${fname} ${lname} for signing in!</h1><p>Please validate your account by clicking the following link:</p> <a href=http://localhost:3000/verify/${token}>Verify</a>`
-        
+        template: 'WelcomeEmail',
+        context: {
+            email,
+            fname,
+            lname,
+            token: `http://localhost:3000/verify/${token}`
+        }
       };
       const message = await transporter.sendMail(mailOptions)
       console.log('mail sent')
       return message
     }catch(e){
+        console.log(e)
       return "error"
     }
 };
