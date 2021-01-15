@@ -13,6 +13,9 @@ const bcrypt = require('bcrypt')
 const resetPasswordEmail = require('../generalPurposeFunctions/Emails/resetPasswordEmail')
 const writeCsv = require('../generalPurposeFunctions/scrape/csvWriteTemplate')
 const getSkills = require('../generalPurposeFunctions/scrape/scrapeRolesSkills/scrapeRolesSkills')
+const multer = require('multer')
+const sharp = require('sharp')
+
 router.post('/students/signup', async (req,res)=>{    
     try{
         let oldStudent = await Student.findOne({email: req.body.email})
@@ -124,8 +127,69 @@ router.get('/token-validity', studentAuth, async (req,res)=>{
         res.status(400).send({error: e.message})
     }
 })
-router.post('/students/add-advisor',studentAuth,async(req,res)=>{
-    console.log(req.studentemail);
+
+router.patch('/students/fname', studentAuth, async (req, res)=>{
+    try {
+        const student = await Student.findOne({email: req.studentemail})
+        student.fname = req.body.fname
+        await student.save()
+        res.status(200).send('Fname changed successfully')
+    } catch (e) {
+        res.status(400).send({error: e.message})
+    }
+})
+
+router.patch('/students/lname', studentAuth, async (req, res)=>{
+    try {
+        const student = await Student.findOne({email: req.studentemail})
+        student.lname = req.body.lname
+        await student.save()
+        res.status(200).send('Lname changed successfully')
+    } catch (e) {
+        res.status(400).send({error: e.message})
+    }
+})
+
+const uploadFile = multer({ 
+    limits:{
+        fileSize: 1000000 // unit in bytes,
+    },
+    fileFilter(req, file, cb){
+        cb(undefined, true);
+    }
+})
+
+router.post('/students/photo', studentAuth, uploadFile.single('upload1'), async (req,res)=>{
+    const student = await Student.findOne({email:req.studentemail})
+    let buffer = await sharp(req.file.buffer).resize({width: 120, height: 120}).png().toBuffer()
+    student.image = buffer
+    await student.save()
+    let bufferOriginal = student.image
+    let imageBase64 = Buffer.from(bufferOriginal).toString('base64')
+    res.send({image: imageBase64})
+}, (err, req, res, next)=>{
+    res.status(401).send({Error: err.message})
+});
+
+router.delete('/students/photo', studentAuth, async (req,res)=>{
+    const student = await Student.findOne({email:req.studentemail})
+    student.image = undefined;
+    await student.save();
+    res.send("Successfully deleted")
+});
+
+router.get('/students/photo', studentAuth, async (req,res)=>{
+    const student = await Student.findOne({email:req.studentemail})
+    if (student.image!=undefined) {
+        let bufferOriginal = student.image;
+        let imageBase64 = Buffer.from(bufferOriginal).toString('base64');
+        res.send({image: imageBase64, timestamp: student.createdAt, fname: student.fname, lname: student.lname});
+    } else {
+        res.status(400).send({error: "User has no image"});
+    }
+})
+
+router.post('/students/add-advisor', studentAuth, async(req,res)=>{
      try{
         const student = await Student.findOne({email:req.studentemail})
         const addAdvisor = await student.addAdvisor(req.body.email)

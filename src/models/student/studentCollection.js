@@ -17,6 +17,9 @@ const studentSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
+    image:{
+        type:Buffer,
+    },
     status:{
         type:String,
         default:"pending"
