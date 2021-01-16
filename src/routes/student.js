@@ -200,6 +200,24 @@ router.post('/students/add-advisor', studentAuth, async(req,res)=>{
         }
 })
 
+router.patch('/students/changepassword', studentAuth, async(req,res)=>{
+    try{
+       const student = await Student.findOne({email:req.studentemail})
+       const isMatch = await bcrypt.compare(req.body.oldPass, student.password)
+       if(!isMatch){
+           res.status(200).send('no match')
+        }else{
+            const hashedPass = await bcrypt.hash(req.body.newPass, 8)
+            student.password = hashedPass
+            await student.save()
+            res.status(200).send('match')
+        }
+       }
+       catch(e){
+           res.status(400).send({error: e.message})
+       }
+})
+
 //getNotes
 router.get('/students/notes',studentAuth,async(req,res)=>
 {
