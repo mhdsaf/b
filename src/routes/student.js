@@ -13,6 +13,7 @@ const bcrypt = require('bcrypt')
 const resetPasswordEmail = require('../generalPurposeFunctions/Emails/resetPasswordEmail')
 const writeCsv = require('../generalPurposeFunctions/scrape/csvWriteTemplate')
 const getSkills = require('../generalPurposeFunctions/scrape/scrapeRolesSkills/scrapeRolesSkills')
+const Roles = require('../models/roles/roles')
 const multer = require('multer')
 const sharp = require('sharp')
 
@@ -169,7 +170,7 @@ router.post('/students/photo', studentAuth, uploadFile.single('upload1'), async 
     res.send({image: imageBase64})
 }, (err, req, res, next)=>{
     res.status(401).send({Error: err.message})
-});
+})
 
 router.delete('/students/photo', studentAuth, async (req,res)=>{
     const student = await Student.findOne({email:req.studentemail})
@@ -218,85 +219,20 @@ router.patch('/students/changepassword', studentAuth, async(req,res)=>{
        }
 })
 
-//getNotes
-router.get('/students/notes',studentAuth,async(req,res)=>
-{
-    try{
-        const notes =await Note.find({students: req.studentid}).populate('students')
-        res.send({notes})
-    }catch(e)
-    {
-        res.status(400).send({error:e})
-    }
+router.get('/students/allroles', async (req, res)=>{
+    const allRoles = await Roles.find()
+    res.status(201).send(allRoles)
 })
 
-//createNote
-router.post('/students/notes',studentAuth,async(req,res)=>
-{
-    try{
-        const newNote = await new Note({
-            title: req.body.title,
-            body: req.body.body,
-            type: 'toSelf',
-            students: req.studentid,
-            advisors: null
-        })
-        await newNote.save()
-        res.status(201).send({message: "Note saved!"})
-    }catch(e)
-    {
-        res.status(400).send({error: e})
-    }
+router.get('/students/specificrole/:role', async (req, res)=>{
+    const roles = await Roles.findOne({role: req.params.role})
+    console.log(roles)
+    res.status(201).send(roles)
 })
 
-//editNote
-router.patch('/students/notes/:id',studentAuth,async(req,res)=>
-{
-    try{
-        const note = await Note.findById({_id:req.params.id})
-        if(!note.students.equals(req.studentid))
-        {
-            res.status(401).send({error: "Input a correct ID"}) 
-        }
-        else
-        {
-            
-            let titleNew = req.body.title
-            note.title = titleNew
-            let bodyNew = req.body.body
-            note.body = bodyNew
-          
-            await note.save()
-            res.status(201).send({message: "Note title changed!"})
-        }
-    }catch(e)
-    {
-        res.status(400).send({error:e})
-    }
-})
-//deleteNote
-router.delete('/students/notes/:id',studentAuth,async(req,res)=>
-{
-    try{
-        const note = await Note.findById({_id:req.params.id})
-        if(!note)
-        {
-            res.status(401).send({error:"Input a correct ID"})
-        }
-        if(!note.students.equals(req.studentid))
-        {
-            res.status(401).send({error: "Input a correct ID"}) 
-        }
-        else
-        {          
-            await note.deleteOne()
-            res.status(201).send({message: "Note Deleted!"})
-        }
-    }catch(e)
-    {
-        res.status(400).send({error:e})
-    }
-})
+
+
+
 
 ///// SCRAPING ONLY:
 router.get('/mostdemandedjobs', async (req,res)=>{

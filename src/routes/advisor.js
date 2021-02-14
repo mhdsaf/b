@@ -1,116 +1,57 @@
-const express = require('express');
-// require advisor database to use it
+const express = require('express')
 const Advisor = require('../models/advisor/advisorCollection')
-const SecretCode = require('../models/SecretCode/SecretCode')
-const advisorAuth =  require('../middleware/advisorAuth')
-const randomstring = require('randomstring')
-const welcomeEmail = require('.././generalPurposeFunctions/Emails/welcomeEmail')
-const Note = require('../models/notes/noteCollection')
-const router = new express.Router();
+const imageToBase64 = require('image-to-base64')
+const axios = require('axios')
+const router = new express.Router()
+const multer = require('multer')
+
 
 router.post('/advisors/signup', async(req, res)=>{
     try {
+        let base64 = ''
+        await imageToBase64(req.body.image).then((response) => {
+            base64 = response
+        }
+        ).catch((error) => {
+                console.log(error)
+            }
+        )
         let advisor = await new Advisor({
             fname: req.body.fname,
             lname: req.body.lname,
             email: req.body.email,
-            password: req.body.password
-        });
-        const returnedAdvisor = await advisor.save();
-        const secretCode = new SecretCode({
-            email: req.body.email,
-            code: randomstring.generate(32)
+            linkedin: req.body.linkedin,
+            university: req.body.university,
+            major: req.body.major,
+            image: base64
         })
-        await secretCode.save()
-        await welcomeEmail(req.body.email,req.body.fname+' '+req.body.lname,`http://localhost:3000/validate-account/${returnedAdvisor._id}/${secretCode._id}`)
-        res.status(200).send({message:"recieved"})
+        await advisor.save()
+        res.status(200).send({message: 'success'})
     } catch (error) {
         console.log(error)
         res.status(400).send({message: 'Missing field(s)'})
     }
 })
 
-router.post('/validate-account',async(req,res)=>{
-    try{
-        const advisor = await Advisor.findById(req.body.advisor_id)
-        const secretCode = await SecretCode.findById(req.body.secret_code)
-        if(!secretCode){
-            throw new Error()
+router.post('/advisors/photo', async(req, res)=>{
+    console.log('here')
+    axios.get(`https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&client_id=78q6bhbb9echn1&client_secret=VQv1aFXO79k5obyL&code=${req.body.code}&redirect_uri=http://localhost:3000/advisors`, ).then((response)=>{
+        let config = {
+            headers: {
+                Authorization: `Bearer ${response.data.access_token}`
+            }
         }
-        if(advisor.email===secretCode.email){
-            advisor.status = "active"
-            await advisor.save()
-            res.status(200).send({message:"recieved"})
-        }
-    }catch(e){
-        res.status(400).send({erro:"error"})
-    }
-})
-
-router.post('/advisors/login',async(req,res)=>{
-    try{
-        const advisor = await Advisor.findByCredentials(req.body.email,req.body.password)
-        if(!advisor.status==="active"){
-            throw new Error("please verify your account")
-        }
-        const token = await advisor.generateAuthToken()
-        res.status(200).send({token: token})
-    }catch(e){
-        if(e.message==="please verify your account"){
-            res.status(400).send({error:e.message})
-        }
-        res.status(400).send({error: "unexpected error"})
-    }
-})
-router.post('/advisors/add-student',advisorAuth,async(req,res)=>{
-    try{
-        //keep tracking advisor
-        console.log(req.advisorId)
-        const advisor = await Advisor.findById(req.advisorId)
-        res.status(200).send({advisor_name:advisor.fname+' '+advisor.lname})
-    }catch(e){
-        res.status(400).send({error: "unexpected error"})
-    }
-    
-})
-
-//getNotes
-router.get('/advisors/notes',advisorAuth,async(req,res)=>
-{
-    try{
-        const notes =await Note.find({advisors: req.advisorId}).populate('advisors','email').populate('students','email')
-        res.send({notes})
-    }catch(e)
-    {
-        res.status(400).send({error:e})
-    }
-})
-//addNotes
-router.post('/advisors/notes',advisorAuth,async(req,res)=>
-{
-    try{
-        const student = await Student.findById(req.body.student)
-        if(!student)
-        {
-            res.status(401).send({error: "Incorrect inputs"}) 
-        }
-        else{
-        console.log(req.advisorId)
-        const newNote = await new Note({
-            advisors: req.advisorId,
-            students: req.body.student,
-            title: req.body.title,
-            body: req.body.body,
-            type: 'advice'    
+        axios.get(`https://api.linkedin.com/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))`, config).then((response)=>{
+            let arr = [...response.data.profilePicture['displayImage~'].elements]
+            let index = arr.length-1
+            console.log(arr[index].identifiers[0].identifier)
+            res.status(200).send({image: arr[index].identifiers[0].identifier})
+        }).catch((err)=>{
+            console.log(err)
         })
-         }   
-        console.log(req.body.student)
-        await newNote.save()
-        res.status(201).send({message: "Note saved!"})
-    }catch(e)
-    {
-        res.status(400).send({error: e})
-    }
+    }).catch((err)=>{
+        res.status(400).send({msg: "error"})
+    })
 })
 
 module.exports = router
