@@ -15,7 +15,8 @@ const writeCsv = require('../generalPurposeFunctions/scrape/csvWriteTemplate')
 const getSkills = require('../generalPurposeFunctions/scrape/scrapeRolesSkills/scrapeRolesSkills')
 const Roles = require('../models/roles/roles')
 const multer = require('multer')
-const sharp = require('sharp')
+const sharp = require('sharp');
+const Advisor = require('../models/advisor/advisorCollection');
 
 router.post('/students/signup', async (req,res)=>{    
     try{
@@ -230,6 +231,16 @@ router.get('/students/specificrole/:role', async (req, res)=>{
     res.status(201).send(roles)
 })
 
+router.get('/students/entrylevel', async (req, res)=>{ // returns number of entry level roles
+    const roles = await Roles.find()
+    const advisors = await Advisor.find()
+    let total = 0
+    await roles.forEach(element => {
+        total = total + element.sortJobs
+    })
+    // res.sendStatus(201).send(total)
+    res.status(201).send({data:total, advisors: advisors.length})
+})
 
 
 

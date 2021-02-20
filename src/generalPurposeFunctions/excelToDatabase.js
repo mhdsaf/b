@@ -14,35 +14,8 @@ const Roles = require('../models/roles/roles')
 const fs = require('fs')
 const parse = require('csv-parser')
 const arr = []
-const database = async ()=>{
-    //const Roles = require('../models/roles/roles')
-    console.log(arr)
-    // let education_degree = [...Object.values(element)[1].split(', ')]
-    // let detail = [...Object.values(element)[5].split('. ')]
-    // let skills = [...Object.values(element)[6].split('. ')]
-    // let qualifications = [...Object.values(element)[7].split('. ')]
-    //console.log(qualifications)
-    try {
-        let Prom1 = await new Roles({
-            role: Object.values(csvData[i])[0],
-            education_degree,
-            salary: Object.values(csvData[i])[2],
-            jobs: Object.values(csvData[i])[3],
-            summary: Object.values(csvData[i])[4],
-            detail,
-            skills,
-            qualifications,
-            education_summary: Object.values(csvData[i])[8],
-        })
-        await Prom1.save()
-        console.log(Prom1)
-    } catch (error) {
-        console.log(error)
-    }
-}
 const readCsv = async () =>{
     let csvData = []
-    let parsedData = []
     await fs.createReadStream(`book1.csv`)
     .pipe(parse({
         delimiter: ','
