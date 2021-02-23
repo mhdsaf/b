@@ -242,8 +242,14 @@ router.get('/students/entrylevel', async (req, res)=>{ // returns number of entr
     res.status(201).send({data:total, advisors: advisors.length})
 })
 
-
-
+router.get('/students/majors', studentAuth, async (req, res)=>{
+    const roles = await Roles.find()
+    const majors = []
+    roles.forEach(element => {
+        majors.push(element.role)
+    })
+    res.status(201).send(majors)
+})
 
 ///// SCRAPING ONLY:
 router.get('/mostdemandedjobs', async (req,res)=>{
