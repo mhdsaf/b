@@ -1,11 +1,10 @@
-const express = require('express');
+const express = require('express')
 const Student = require('../models/student/studentCollection')
-const studentAuth =  require('../middleware/studentAuth');
+const studentAuth =  require('../middleware/studentAuth')
 const scrapeMostDemandedJobs = require('../generalPurposeFunctions/scrape/scrapeMostDemanded')
 const jwt = require('jsonwebtoken')
 const scrapeAllRoles = require('../generalPurposeFunctions/scrape/scrapeAllRoles')
-const router = new express.Router();
-const Note = require('../models/notes/noteCollection')
+const router = new express.Router()
 const Scraping = require('../models/scraping/scrapingCollection')
 const welcomeEmail = require('../generalPurposeFunctions/Emails/welcomeEmail')
 const zeus = require('../generalPurposeFunctions/scrape/scrapeRolesDetails/try')
@@ -15,8 +14,8 @@ const writeCsv = require('../generalPurposeFunctions/scrape/csvWriteTemplate')
 const getSkills = require('../generalPurposeFunctions/scrape/scrapeRolesSkills/scrapeRolesSkills')
 const Roles = require('../models/roles/roles')
 const multer = require('multer')
-const sharp = require('sharp');
-const Advisor = require('../models/advisor/advisorCollection');
+const sharp = require('sharp')
+const Advisor = require('../models/advisor/advisorCollection')
 
 router.post('/students/signup', async (req,res)=>{    
     try{

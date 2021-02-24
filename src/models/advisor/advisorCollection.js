@@ -19,14 +19,7 @@ const advisorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    university:{
-        type: String,
-        required: true
-    },
-    major:{
-        type: String,
-        required: true
-    },
+    roles:[],
     image:{
         type: String,
         required: true

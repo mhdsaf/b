@@ -8,25 +8,30 @@ const multer = require('multer')
 
 router.post('/advisors/signup', async(req, res)=>{
     try {
-        let base64 = ''
-        await imageToBase64(req.body.image).then((response) => {
-            base64 = response
-        }
-        ).catch((error) => {
-                console.log(error)
+        let exists = await Advisor.findOne({email: req.body.email})
+        if(exists){
+            console.log('here')
+            res.status(200).send({message: 'exists'})
+        }else{
+            let base64 = ''
+            await imageToBase64(req.body.image).then((response) => {
+                base64 = response
             }
-        )
-        let advisor = await new Advisor({
-            fname: req.body.fname,
-            lname: req.body.lname,
-            email: req.body.email,
-            linkedin: req.body.linkedin,
-            university: req.body.university,
-            major: req.body.major,
-            image: base64
-        })
-        await advisor.save()
-        res.status(200).send({message: 'success'})
+            ).catch((error) => {
+                    console.log(error)
+                }
+            )
+            let advisor = await new Advisor({
+                fname: req.body.fname,
+                lname: req.body.lname,
+                email: req.body.email,
+                linkedin: req.body.linkedin,
+                roles: [...req.body.roles],
+                image: base64
+            })
+            await advisor.save()
+            res.status(200).send({message: 'success'})
+        }
     } catch (error) {
         console.log(error)
         res.status(400).send({message: 'Missing field(s)'})
@@ -34,7 +39,6 @@ router.post('/advisors/signup', async(req, res)=>{
 })
 
 router.post('/advisors/photo', async(req, res)=>{
-    console.log('here')
     axios.get(`https://www.linkedin.com/oauth/v2/accessToken?grant_type=authorization_code&client_id=78q6bhbb9echn1&client_secret=VQv1aFXO79k5obyL&code=${req.body.code}&redirect_uri=http://localhost:3000/advisors`, ).then((response)=>{
         let config = {
             headers: {
