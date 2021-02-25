@@ -10,7 +10,6 @@ router.post('/advisors/signup', async(req, res)=>{
     try {
         let exists = await Advisor.findOne({email: req.body.email})
         if(exists){
-            console.log('here')
             res.status(200).send({message: 'exists'})
         }else{
             let base64 = ''

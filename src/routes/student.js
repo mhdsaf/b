@@ -186,7 +186,7 @@ router.get('/students/photo', studentAuth, async (req,res)=>{
         let imageBase64 = Buffer.from(bufferOriginal).toString('base64');
         res.send({image: imageBase64, timestamp: student.createdAt, fname: student.fname, lname: student.lname});
     } else {
-        res.status(400).send({error: "User has no image"});
+        res.status(200).send({timestamp: student.createdAt, fname: student.fname, lname: student.lname, error: "notfound"});
     }
 })
 
