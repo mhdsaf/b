@@ -4,6 +4,26 @@ const imageToBase64 = require('image-to-base64')
 const axios = require('axios')
 const router = new express.Router()
 const multer = require('multer')
+const Roles = require('../models/roles/roles')
+
+router.get('/advisors/all', async(req, res)=>{
+    try {
+        let advisors = await Advisor.find()
+        res.status(200).send(advisors)
+    } catch (error) {
+        res.status(400).send('error')
+    }
+})
+
+router.get('/advisors/:id', async(req, res)=>{
+    try {
+        let advisor = await Advisor.findById(req.params.id)
+        console.log(advisor)
+        res.status(200).send(advisor)
+    } catch (error) {
+        res.status(400).send('error')
+    }
+})
 
 
 router.post('/advisors/signup', async(req, res)=>{
@@ -26,7 +46,8 @@ router.post('/advisors/signup', async(req, res)=>{
                 email: req.body.email,
                 linkedin: req.body.linkedin,
                 roles: [...req.body.roles],
-                image: base64
+                image: base64,
+                workExperience: req.body.workExperience
             })
             await advisor.save()
             res.status(200).send({message: 'success'})

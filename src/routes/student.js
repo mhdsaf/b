@@ -220,6 +220,20 @@ router.patch('/students/changepassword', studentAuth, async(req,res)=>{
 })
 
 router.get('/students/allroles', async (req, res)=>{
+    try {
+        let roles = await Roles.find()
+        let filteredRoles = []
+        roles.forEach(element => {
+            filteredRoles.push(element.role)  
+        })
+        res.status(200).send(filteredRoles)
+    } catch (error) {
+        console.log(error)
+        res.status(401).send('error')
+    }
+})
+
+router.get('/students/allroles', async (req, res)=>{
     const allRoles = await Roles.find()
     res.status(201).send(allRoles)
 })

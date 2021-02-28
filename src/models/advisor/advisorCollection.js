@@ -24,6 +24,7 @@ const advisorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    workExperience:[],
     students:[{
         ref: 'Student',
         type: Schema.Types.ObjectId
