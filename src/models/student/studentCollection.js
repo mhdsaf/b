@@ -29,23 +29,13 @@ const studentSchema = new mongoose.Schema({
         default:false
     },
     interests:{
-        type: [String],
-        enum: ['Math','Physics','Bio','Chemistry','Philosophy','Sport','Art','Political Science']
-    },
-    country:{
-        type: String,
-        enum:['United State','Lebanon','UAE']
+        type: []
     },
     password:{
         type: String,
         required: true
     },
-    advisors:[{
-        advisor:{
-       ref: 'Advisor',
-        type: Schema.Types.ObjectId 
-        }
-    }]
+    advisors:[]
 }, {timestamps: true});
 
 studentSchema.methods.addAdvisor = async function(email){
@@ -75,11 +65,5 @@ studentSchema.statics.findByCredentials = async (_email,_password)=>{
 
     return student 
 }
-// studentSchema.pre('save', async function(next) {
-//     this.password = await bcrypt.hash(this.password, 8)
-//     next()
-// });
-
 const Student = mongoose.model('Student', studentSchema);
 module.exports = Student;
-

@@ -1,6 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
 const Schema = mongoose.Schema
 const advisorSchema = new mongoose.Schema({
     fname:{
@@ -25,10 +23,7 @@ const advisorSchema = new mongoose.Schema({
         required: true
     },
     workExperience:[],
-    students:[{
-        ref: 'Student',
-        type: Schema.Types.ObjectId
-    }]
+    students:[]
 }, {timestamps: true});
 const Advisor = mongoose.model('Advisor', advisorSchema);
 module.exports = Advisor;

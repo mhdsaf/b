@@ -45,7 +45,6 @@ router.post('/students/verify', async (req,res)=>{
     try {
         const token = req.body.token
         const decodedToken = jwt.verify(token, 'fypfridaystudent')
-        console.log(decodedToken.email)
         const student = await Student.findOne({email: decodedToken.email})
         student.status = 'active'
         const newToken = await jwt.sign({email: student.email},'fypfridaystudent', {expiresIn: '3600000'})
@@ -62,8 +61,6 @@ router.post('/students/login',async(req,res)=>{
         if(student){
             if(student.status=='active'){
                 const password = await student.password.trim()
-                console.log(password)
-                console.log(req.body.password)
                 const isMatch = await bcrypt.compare(req.body.password, password)
                 if(isMatch){
                     const newToken = await jwt.sign({email: student.email},'fypfridaystudent', {expiresIn: '3600000'})
@@ -113,7 +110,8 @@ router.get('/students/info', studentAuth, async (req, res)=>{
         res.send({
             fname: student.fname,
             lname: student.lname,
-            didTakeTest: student.didTakeTest
+            didTakeTest: student.didTakeTest,
+            id: student._id
         })
     } catch (error) {
         console.log(error)
@@ -219,7 +217,7 @@ router.patch('/students/changepassword', studentAuth, async(req,res)=>{
        }
 })
 
-router.get('/students/allroles', async (req, res)=>{
+router.get('/students/retreiveallroles', async (req, res)=>{
     try {
         let roles = await Roles.find()
         let filteredRoles = []
@@ -233,14 +231,17 @@ router.get('/students/allroles', async (req, res)=>{
     }
 })
 
-router.get('/students/allroles', async (req, res)=>{
-    const allRoles = await Roles.find()
-    res.status(201).send(allRoles)
+router.get('/students/allroles', studentAuth, async (req, res)=>{
+    try {
+        const allRoles = await Roles.find()
+        res.status(201).send(allRoles)
+    } catch (error) {
+        res.status(400).send('error')
+    }
 })
 
 router.get('/students/specificrole/:role', async (req, res)=>{
     const roles = await Roles.findOne({role: req.params.role})
-    console.log(roles)
     res.status(201).send(roles)
 })
 
@@ -262,6 +263,28 @@ router.get('/students/majors', studentAuth, async (req, res)=>{
         majors.push(element.role)
     })
     res.status(201).send(majors)
+})
+
+router.post('/students/connect', studentAuth, async (req, res)=>{
+    try {
+        const advisor = await Advisor.findById(req.body.id)
+        const student = await Student.findOne({email: req.studentemail})   
+        let arr = [...student.advisors]
+        let arr1 = [...advisor.students]
+        if(arr.includes(req.body.id)){
+            throw new Error('You are already connected to this advisor')
+        }
+        arr.push(advisor._id)
+        student.advisors = [...arr]
+        arr1.push(student._id)
+        advisor.students = [...arr1]
+        await student.save()
+        await advisor.save()
+        res.status(200).send(student)
+    }catch (error) {
+        res.status(400).send('error')
+        console.log(error)
+    }
 })
 
 ///// SCRAPING ONLY:
