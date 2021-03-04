@@ -287,6 +287,75 @@ router.post('/students/connect', studentAuth, async (req, res)=>{
     }
 })
 
+router.get('/students/myadvisors', studentAuth, async(req, res)=>{
+    try {
+        const myAdvisors = await Student.findOne({email: req.studentemail})
+        if(myAdvisors.advisors.length===0){
+            res.status(200).send('')
+        }else{
+            let arr = []
+            const sendRequest = ()=>{
+                res.status(200).send(arr)
+            }
+            await myAdvisors.advisors.forEach( async (element, index)=>{
+                let advisor = await Advisor.findById(element)
+                arr.push(advisor)
+                if(index+1===myAdvisors.advisors.length){
+                    sendRequest()
+                }
+            })
+        }
+    } catch (error) {
+        res.status(400).send('error')
+    }
+})
+
+router.get('/students/isadvisor/:id', studentAuth, async(req, res)=>{
+    try {
+        const advisor = await Advisor.findById(req.params.id)
+        if(advisor){
+            res.status(200).send(true)
+        }else{
+            res.status(200).send(false)
+        }
+    } catch (error) {
+        res.status(400).send('error')
+    }
+})
+
+router.post('/students/removeadvisor', studentAuth, async(req, res)=>{
+    try {
+        const student = await Student.findOne({email: req.studentemail})
+        const advisor = await Advisor.findById(req.body.id)
+        let arr = [...student.advisors]
+        arr.splice(arr.indexOf(req.body.id), 1)
+        student.advisors = [...arr]
+        let arr1 = [...advisor.students]
+        arr1.splice(arr.indexOf(student._id), 1)
+        advisor.students = [...arr1]
+        await student.save()
+        await advisor.save()
+        res.status(200).send(true)
+    } catch (error) {
+        res.status(400).send('error')
+    }
+})
+
+router.post('/students/testevaluation', studentAuth, async(req, res)=>{
+    // ComputerScience
+    // Math
+    // Physics
+    // English
+    // Biology
+    // Chemistry
+    // TakeCareOfPeople
+    // StandardizedTest
+    // Programming
+    // Writing
+    // Communication
+    // Design
+})
+
 ///// SCRAPING ONLY:
 router.get('/mostdemandedjobs', async (req,res)=>{
     try {

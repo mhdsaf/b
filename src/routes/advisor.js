@@ -5,6 +5,7 @@ const axios = require('axios')
 const router = new express.Router()
 const multer = require('multer')
 const Roles = require('../models/roles/roles')
+const studentAuth =  require('../middleware/studentAuth')
 
 router.get('/advisors/all', async(req, res)=>{
     try {
@@ -15,10 +16,9 @@ router.get('/advisors/all', async(req, res)=>{
     }
 })
 
-router.get('/advisors/:id', async(req, res)=>{
+router.get('/advisors/:id', studentAuth, async(req, res)=>{
     try {
         let advisor = await Advisor.findById(req.params.id)
-        console.log(advisor)
         res.status(200).send(advisor)
     } catch (error) {
         res.status(400).send('error')
@@ -68,7 +68,6 @@ router.post('/advisors/photo', async(req, res)=>{
         axios.get(`https://api.linkedin.com/v2/me?projection=(id,firstName,lastName,profilePicture(displayImage~:playableStreams))`, config).then((response)=>{
             let arr = [...response.data.profilePicture['displayImage~'].elements]
             let index = arr.length-1
-            console.log(arr[index].identifiers[0].identifier)
             res.status(200).send({image: arr[index].identifiers[0].identifier})
         }).catch((err)=>{
             console.log(err)
