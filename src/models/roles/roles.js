@@ -22,10 +22,7 @@ const RolesSchema = new mongoose.Schema({
     },
     detail: [],
     skills: [],
-    qualifications: [],
-    education_summary: {
-        type: String
-    }
+    qualifications: []
 })
 
 const Model = mongoose.model('roles', RolesSchema)

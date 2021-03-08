@@ -14,9 +14,10 @@ const Roles = require('../models/roles/roles')
 const fs = require('fs')
 const parse = require('csv-parser')
 const arr = []
+let i = 0
 const readCsv = async () =>{
     let csvData = []
-    await fs.createReadStream(`book1.csv`)
+    await fs.createReadStream(`book3.csv`)
     .pipe(parse({
         delimiter: ','
     })
@@ -46,12 +47,24 @@ const readCsv = async () =>{
                     detail,
                     skills,
                     qualifications,
-                    education_summary: Object.values(element)[8],
                     sortJobs: parseInt(sortJobs),
                     sortSalary: parseInt(sortSalary)
                 })
                 await Prom1.save()
-                console.log('a')
+                // let Prom1 = {
+                //     role: Object.values(element)[0].trim(),
+                //     education_degree,
+                //     salary: Object.values(element)[2],
+                //     jobs: Object.values(element)[3],
+                //     summary: Object.values(element)[4],
+                //     detail,
+                //     skills,
+                //     qualifications,
+                //     sortJobs: parseInt(sortJobs),
+                //     sortSalary: parseInt(sortSalary)
+                // }
+                i = i + 1
+                console.log(i)
             } catch (error) {
                 console.log(error)
             }
