@@ -28,9 +28,7 @@ const studentSchema = new mongoose.Schema({
         type:Boolean,
         default:false
     },
-    interests:{
-        type: []
-    },
+    interests:[],
     password:{
         type: String,
         required: true

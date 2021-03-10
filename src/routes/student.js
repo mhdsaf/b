@@ -16,7 +16,6 @@ const Roles = require('../models/roles/roles')
 const multer = require('multer')
 const sharp = require('sharp')
 const Advisor = require('../models/advisor/advisorCollection')
-
 router.post('/students/signup', async (req,res)=>{    
     try{
         let oldStudent = await Student.findOne({email: req.body.email})
@@ -111,7 +110,8 @@ router.get('/students/info', studentAuth, async (req, res)=>{
             fname: student.fname,
             lname: student.lname,
             didTakeTest: student.didTakeTest,
-            id: student._id
+            id: student._id,
+            interests: student.interests
         })
     } catch (error) {
         console.log(error)
