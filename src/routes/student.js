@@ -106,6 +106,9 @@ router.patch('/students/resetpass', async (req, res)=>{
 router.get('/students/info', studentAuth, async (req, res)=>{
     try {
         let student = await Student.findOne({email: req.studentemail})
+        // student.didTakeTest = true
+        // student.interests = ['Electrician', 'Software Developer', 'Data Scientist']
+        // await student.save()
         res.send({
             fname: student.fname,
             lname: student.lname,
@@ -268,7 +271,8 @@ router.get('/students/majors', studentAuth, async (req, res)=>{
 router.post('/students/connect', studentAuth, async (req, res)=>{
     try {
         const advisor = await Advisor.findById(req.body.id)
-        const student = await Student.findOne({email: req.studentemail})   
+        const student = await Student.findOne({email: req.studentemail})  
+        console.log('added ', advisor._id) 
         let arr = [...student.advisors]
         let arr1 = [...advisor.students]
         if(arr.includes(req.body.id)){
@@ -278,9 +282,10 @@ router.post('/students/connect', studentAuth, async (req, res)=>{
         student.advisors = [...arr]
         arr1.push(student._id)
         advisor.students = [...arr1]
+        let linkedInURL = advisor.linkedin
         await student.save()
         await advisor.save()
-        res.status(200).send(student)
+        res.status(200).send(linkedInURL)
     }catch (error) {
         res.status(400).send('error')
         console.log(error)
@@ -313,11 +318,14 @@ router.get('/students/myadvisors', studentAuth, async(req, res)=>{
 router.get('/students/isadvisor/:id', studentAuth, async(req, res)=>{
     try {
         const advisor = await Advisor.findById(req.params.id)
-        if(advisor){
-            res.status(200).send(true)
-        }else{
-            res.status(200).send(false)
-        }
+        const student = await Student.findOne({email: req.studentemail})
+        let isFound = false
+        student.advisors.forEach(element => {
+            if(advisor._id.equals(element)){
+                isFound = true
+            }
+        })
+        res.status(200).send(isFound)
     } catch (error) {
         res.status(400).send('error')
     }
@@ -327,12 +335,24 @@ router.post('/students/removeadvisor', studentAuth, async(req, res)=>{
     try {
         const student = await Student.findOne({email: req.studentemail})
         const advisor = await Advisor.findById(req.body.id)
+        console.log('removed ', advisor._id)
         let arr = [...student.advisors]
-        arr.splice(arr.indexOf(req.body.id), 1)
-        student.advisors = [...arr]
+        let newStudentArr = []
+        arr.forEach(element => {
+            console.log(element)
+            if(!advisor._id.equals(element)){
+                newStudentArr.push(element)
+            }else{console.log('pls')}
+        })
+        student.advisors = [...newStudentArr]
         let arr1 = [...advisor.students]
-        arr1.splice(arr.indexOf(student._id), 1)
-        advisor.students = [...arr1]
+        let newAdvisorArr = []
+        arr1.forEach(element => {
+            if(!student._id.equals(element)){
+                newAdvisorArr.push(element)
+            }else{console.log('XDD')}
+        })
+        advisor.students = [...newAdvisorArr]
         await student.save()
         await advisor.save()
         res.status(200).send(true)
@@ -354,198 +374,5 @@ router.post('/students/testevaluation', studentAuth, async(req, res)=>{
     // Writing
     // Communication
     // Design
-})
-
-///// SCRAPING ONLY:
-router.get('/mostdemandedjobs', async (req,res)=>{
-    try {
-        const data = await scrapeMostDemandedJobs('https://www.indeed.com/career-advice/finding-a-job/in-demand-careers')
-        res.status(200).send(data)
-    } catch (error) {
-        console.log(error)
-    }
-})
-
-router.get('/career-roles', async (req, res)=>{
-    try {
-        scrapedData = await scrapeAllRoles('https://www.indeed.com/career-advice/careers')
-        // const Prom1 = await new Scraping({
-        //     description: 'Roles',
-        //     data : scrapedData
-        // })
-        // await Prom1.save()
-        const Prom1 = await Scraping.findOne({description: 'Roles'})
-        arr = [...Prom1.data]
-        await scrapedData.forEach(element => {
-            arr.push(element)
-        });
-        Prom1.data = arr
-        await Prom1.save()
-        res.send('success')
-    } catch (error) {
-        console.log(error)
-    }
-})
-router.get('/excel', async (req,res)=>{
-    const fs = require('fs')
-    const parse = require('csv-parser')
-    // const Prom1 = await Scraping.findOne({description: 'Roles'})
-    // console.log(Prom1)
-    let csvData = []
-    let parsedRoles = []
-    // roles
-    const roles = await fs.createReadStream('roles.csv')
-    roles.pipe(parse({
-        delimiter: ','
-    })
-    )
-    .on('data', function (row) {
-        csvData.push(row)
-    })
-    .on('end', async() => {
-        //parsedRoles.push('wedding-planner')
-        await csvData.forEach(async element => {
-            await parsedRoles.push(Object.values(element)[0])
-        });
-        //console.log(parsedRoles[0])
-    })
-
-    let csvData1 = []
-    let parsedJobs = []
-    const jobs = await fs.createReadStream('jobs.csv')
-    jobs.pipe(parse({
-        delimiter: ','
-    })
-    )
-    .on('data', function (row) {
-        csvData1.push(row)
-    })
-    .on('end', async() => {
-        //parsedRoles.push('wedding-planner')
-        await csvData1.forEach(async element => {
-            await parsedJobs.push(Object.values(element)[0])
-        });
-        //console.log(parsedJobs[0])
-    })
-
-    let csvData2 = []
-    let parsedSalary = []
-    const salary = await fs.createReadStream('salaries.csv')
-    salary.pipe(parse({
-        delimiter: ','
-    })
-    )
-    .on('data', function (row) {
-        csvData2.push(row)
-    })
-    .on('end', async() => {
-        //parsedRoles.push('wedding-planner')
-        await csvData2.forEach(async element => {
-            await parsedSalary.push(Object.values(element)[0])
-        });
-        //console.log(parsedSalary[0])
-    })
-
-
-    let csvData3 = []
-    let parsedSummary = []
-    const summary = await fs.createReadStream('summary.csv')
-    summary.pipe(parse({
-        delimiter: ','
-    })
-    )
-    .on('data', function (row) {
-        csvData3.push(row)
-    })
-    .on('end', async() => {
-        //parsedRoles.push('wedding-planner')
-        await csvData3.forEach(async element => {
-            await parsedSummary.push(Object.values(element)[0])
-        });
-        let i = 0
-        let finalData = []
-        let zeusData = zeus()
-        console.log('asd')
-        while(i<=420){
-            let obj = {
-                role : parsedRoles[i].trim(),
-                salary : parsedSalary[i].trim(),
-                jobcount : parsedJobs[i].trim(),
-                summary : parsedSummary[i],
-                details : zeusData[i].li
-            }
-            console.log(obj)
-            finalData.push(obj)
-            i++
-        }
-        const Prom1 = await new Scraping({
-            data : finalData
-        })
-        await Prom1.save()
-        res.send('mission accomplished')
-    })
-})
-
-router.get('/final', async (req,res)=>{
-    try {
-        let i = 0
-        let content = ''
-        let arr = []
-        const data = await Scraping.find();
-        await data[0].data.forEach(async element => {
-            content = await element.details.join('. ')
-            arr.push(content)
-            //console.log(content)
-            // element.details.forEach(elements => {
-            //     i++
-            // });
-        });
-        await writeCsv(arr)
-        console.log(arr)
-        res.status(200).send('ok')
-    } catch (error) {
-        console.log(error)
-    }
-})
-
-router.get('/find', async (req, res)=>{
-    try {
-        const data = await Scraping.findById('5fea3afcb7f0ab11e0728fcf')
-        const skills = await getSkills()
-        await skills.forEach((element, index) => {
-            let arr = []
-            arr.push(element)
-            data.data[index].requirements = arr
-        })
-        await data.save()
-        res.status(200).send('done')
-    } catch (error) {
-        console.log(error)
-    }
-})
-router.get('/toexcel', async (req, res)=>{
-    try {
-        const data = await Scraping.findById('5fea3afcb7f0ab11e0728fcf')
-        let arr = []
-        let x = ''
-        let count = 0
-        for (let i = 0; i <= 420; i++) {
-            if(data.data[i].requirements[0].qualifications.length>1){
-                x = data.data[i].requirements[0].qualifications.join('. ')
-            }else{
-                count++
-                x = ''
-            }
-            arr.push(x)
-        }
-        await writeCsv(arr)
-        res.send({msg: 'Done'})
-        //console.log(data.data[0].requirements)
-        //console.log(data.data[0].requirements[0].skills)
-        //data.data[0].requirements[0].skills
-        //data.data[0].requirements[1].qualifications
-    } catch (error) {
-        console.log(error)
-    }
 })
 module.exports = router 
