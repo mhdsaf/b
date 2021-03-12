@@ -7,7 +7,7 @@ const multer = require('multer')
 const Roles = require('../models/roles/roles')
 const studentAuth =  require('../middleware/studentAuth')
 
-router.get('/advisors/all', async(req, res)=>{
+router.get('/advisors/all', studentAuth, async(req, res)=>{
     try {
         let advisors = await Advisor.find()
         res.status(200).send(advisors)
@@ -53,6 +53,7 @@ router.post('/advisors/signup', async(req, res)=>{
             res.status(200).send({message: 'success'})
         }
     } catch (error) {
+        console.log('ere')
         console.log(error)
         res.status(400).send({message: 'Missing field(s)'})
     }

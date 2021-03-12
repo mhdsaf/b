@@ -361,6 +361,37 @@ router.post('/students/removeadvisor', studentAuth, async(req, res)=>{
     }
 })
 
+router.post('/students/removeinterest', studentAuth, async(req, res)=>{
+    try {
+        const student = await Student.findOne({email: req.studentemail})
+        let arr = [...student.interests]
+        let newArr = []
+        arr.forEach(element => {
+            if(element!==req.body.interest){
+                newArr.push(element)
+            }
+        })
+        student.interests = [...newArr]
+        await student.save()
+        res.status(200).send(newArr)
+    } catch (error) {
+        res.status(400).send('error')
+    }
+})
+
+router.post('/students/addinterest', studentAuth, async(req, res)=>{
+    try {
+        const student = await Student.findOne({email: req.studentemail})
+        let arr = [...student.interests]
+        arr.push(req.body.interest)
+        student.interests = [...arr]
+        await student.save()
+        res.status(200).send(arr)
+    } catch (error) {
+        res.status(400).send('error')
+    }
+})
+
 router.post('/students/testevaluation', studentAuth, async(req, res)=>{
     // ComputerScience
     // Math
