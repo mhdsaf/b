@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "node-csv": "^0.1.2",
     "nodemailer": "^6.4.16",
     "nodemailer-express-handlebars": "^4.0.0",
+    "path": "^0.12.7",
     "randomstring": "^1.1.5",
     "sharp": "^0.27.0",
     "sort-algorithms-js": "^3.10.1"

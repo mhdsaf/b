@@ -234,7 +234,7 @@ router.get('/students/retreiveallroles', async (req, res)=>{
     }
 })
 
-router.get('/students/allroles', studentAuth, async (req, res)=>{
+router.get('/students/allroles', async (req, res)=>{
     try {
         const allRoles = await Roles.find()
         res.status(201).send(allRoles)
