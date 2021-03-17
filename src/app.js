@@ -4,6 +4,8 @@ const path = require('path')
 
 const cors = require('cors')
 
+const cron = require('node-cron');
+
 require('./database/dbConnect')
 
 const app = express()
@@ -11,7 +13,6 @@ const app = express()
 const studentRouter = require("./routes/student")
 
 const advisorRouter = require("./routes/advisor")
-
 
 app.use(express.json(), cors())
 
@@ -27,6 +28,10 @@ const port = process.env.PORT || 4200
 app.use(studentRouter)
 
 app.use(advisorRouter)
+
+// cron.schedule('* * * * *', function() {
+//     console.log('running a task every minute')
+// })
 
 app.listen(port,()=>{
     console.log(`Server is running on port ${port}`)
