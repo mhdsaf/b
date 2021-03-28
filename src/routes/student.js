@@ -16,6 +16,7 @@ const Roles = require('../models/roles/roles')
 const multer = require('multer')
 const sharp = require('sharp')
 const Advisor = require('../models/advisor/advisorCollection')
+const News = require('../models/news/newsCollection')
 router.post('/students/signup', async (req,res)=>{    
     try{
         let oldStudent = await Student.findOne({email: req.body.email})
@@ -191,17 +192,6 @@ router.get('/students/photo', studentAuth, async (req,res)=>{
     }
 })
 
-router.post('/students/add-advisor', studentAuth, async(req,res)=>{
-     try{
-        const student = await Student.findOne({email:req.studentemail})
-        const addAdvisor = await student.addAdvisor(req.body.email)
-        res.status(200).send("advisor added")
-        }
-        catch(e){
-            res.status(400).send({error: e.message})
-        }
-})
-
 router.patch('/students/changepassword', studentAuth, async(req,res)=>{
     try{
        const student = await Student.findOne({email:req.studentemail})
@@ -335,14 +325,12 @@ router.post('/students/removeadvisor', studentAuth, async(req, res)=>{
     try {
         const student = await Student.findOne({email: req.studentemail})
         const advisor = await Advisor.findById(req.body.id)
-        console.log('removed ', advisor._id)
         let arr = [...student.advisors]
         let newStudentArr = []
         arr.forEach(element => {
-            console.log(element)
             if(!advisor._id.equals(element)){
                 newStudentArr.push(element)
-            }else{console.log('pls')}
+            }
         })
         student.advisors = [...newStudentArr]
         let arr1 = [...advisor.students]
@@ -350,7 +338,7 @@ router.post('/students/removeadvisor', studentAuth, async(req, res)=>{
         arr1.forEach(element => {
             if(!student._id.equals(element)){
                 newAdvisorArr.push(element)
-            }else{console.log('XDD')}
+            }
         })
         advisor.students = [...newAdvisorArr]
         await student.save()
@@ -405,5 +393,9 @@ router.post('/students/testevaluation', studentAuth, async(req, res)=>{
     // Writing
     // Communication
     // Design
+})
+router.get('/students/news', studentAuth, async(req, res)=>{
+    const news = await News.find()
+    res.status(200).send(news)
 })
 module.exports = router 
